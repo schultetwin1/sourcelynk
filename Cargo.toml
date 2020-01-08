@@ -1,0 +1,18 @@
+[package]
+name = "sourcelynk"
+version = "0.1.0"
+authors = ["Matt Schulte <schultetwin1@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+compiledfiles="0.2"
+clap = "2.33"
+git2 = "0.10"
+log = "0.4"
+pretty_env_logger = "0.3.1"
+serde_json = "1.0"
+tempfile = "3.1.0"
+url = "2.1.0"
+walkdir = "2"
