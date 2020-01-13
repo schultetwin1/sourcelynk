@@ -1,5 +1,6 @@
 use log::{debug, error, trace, warn};
 use walkdir::WalkDir;
+use path_slash::PathExt;
 
 use std::collections::HashMap;
 use std::fs::File;
@@ -108,6 +109,7 @@ fn repos_from_source_files(source_files: &[compiledfiles::FileInfo]) -> Vec<git2
         if file.path.is_file() {
             if let Some(repo) = repo_from_source_file(&file.path) {
                 let rel_path = file.path.strip_prefix(repo.workdir().unwrap()).unwrap();
+                let rel_path = PathBuf::from(rel_path.to_slash().unwrap());
                 if repos
                     .iter()
                     .any(|x| x.workdir().unwrap() == repo.workdir().unwrap())
@@ -115,6 +117,8 @@ fn repos_from_source_files(source_files: &[compiledfiles::FileInfo]) -> Vec<git2
                     // Do nothing, we already know about this repo
                 } else if repo.head().unwrap().peel_to_tree().unwrap().get_path(&rel_path).is_ok() {
                     repos.push(repo);
+                } else {
+                    debug!("{} not tracked in git repo {}", file.path.display(), repo.workdir().unwrap().display());
                 }
             }
         } else {
