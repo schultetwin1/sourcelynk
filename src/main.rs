@@ -215,16 +215,18 @@ fn generate_mapping(repos: &[git2::Repository]) -> HashMap<PathBuf, String> {
 }
 
 fn generate_url(url: &url::Url, hash: &git2::Oid) -> Option<url::Url> {
-    match url.domain() {
-        Some("github.com") => Some(generate_github_url(url, hash)),
-        Some(d) => {
-            warn!("{} is not a known domain ({})", d, url);
+    if let Some(domain) = url.domain() {
+        if domain == "github.com" {
+            Some(generate_github_url(url, hash))
+        } else if domain.ends_with("visualstudio.com") {
+            Some(generate_azure_devops_url(url, hash))
+        } else {
+            warn!("{} is not a known domain ({})", domain, url);
             None
         }
-        _ => {
-            warn!("Url {} has no domain", url);
-            None
-        }
+    } else {
+        warn!("Url {} has no domain", url);
+        None
     }
 }
 
@@ -237,6 +239,24 @@ fn generate_github_url(url: &url::Url, hash: &git2::Oid) -> url::Url {
     let url_str = format!(
         "https://api.github.com/repos/{}/{}/contents/*?ref={}",
         user, repo, hash
+    );
+
+    url::Url::parse(&url_str).unwrap()
+}
+
+fn generate_azure_devops_url(url: &url::Url, hash: &git2::Oid) -> url::Url {
+    let components = url.path_segments().unwrap().collect::<Vec<&str>>();
+    let domain = url.domain().unwrap();
+
+    let organization = domain.split('.').next().unwrap();
+    let project = components[1];
+    let repo = components[3];
+    let url_str = format!(
+        "https://dev.azure.com/{}/{}/_apis/git/repositories/{}/items?versionDescriptor.versionType=commit&versionDescriptor.version={}&api-version=5.1&path=/*",
+        organization,
+        project,
+        repo,
+        hash
     );
 
     url::Url::parse(&url_str).unwrap()
