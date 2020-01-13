@@ -60,8 +60,11 @@ fn main() -> Result<(), std::io::Error> {
             continue;
         }
 
+        trace!("{} contains {} source files", entry.display(), source_files.len());
+
         // generate source file to path mapping
         let repos = repos_from_source_files(&source_files);
+        trace!("Found {} repos for {}", repos.len(), entry.display());
         // generate mapping of directories to urls
         let mapping = generate_mapping(&repos);
 
@@ -106,8 +109,10 @@ fn main() -> Result<(), std::io::Error> {
 fn repos_from_source_files(source_files: &[compiledfiles::FileInfo]) -> Vec<git2::Repository> {
     let mut repos = Vec::<git2::Repository>::new();
     for file in source_files {
+        trace!("Searching for repo for {}", file.path.display());
         if file.path.is_file() {
             if let Some(repo) = repo_from_source_file(&file.path) {
+                trace!("Found repo {} for {}", repo.workdir().unwrap().display(), file.path.display());
                 let rel_path = file.path.strip_prefix(repo.workdir().unwrap()).unwrap();
                 let rel_path = PathBuf::from(rel_path.to_slash().unwrap());
                 if repos
