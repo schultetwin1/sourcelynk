@@ -23,7 +23,7 @@ fn main() -> Result<(), std::io::Error> {
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| e.file_type().is_file())
-        .filter(|e| is_possible_symbol_file(e))
+        .filter(is_possible_symbol_file)
         .map(|e| e.path().to_owned())
     {
         trace!("Checking {} for embedded sources", entry.display());
