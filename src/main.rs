@@ -8,8 +8,6 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::vec::Vec;
 
-use tempfile;
-
 mod magic;
 
 const APP_AUTHOR: &str = "Matt Schulte <schultetwin1@gmail.com>";
@@ -230,7 +228,7 @@ fn generate_mapping(repos: &[git2::Repository]) -> HashMap<PathBuf, String> {
         let hash = head.target().unwrap();
         match generate_url(&remote_url, &hash) {
             Some(url) => {
-                map.insert(workdir.join("*"), url.into_string());
+                map.insert(workdir.join("*"), url.into());
             }
             None => {
                 warn!(
@@ -300,7 +298,7 @@ fn initialize_logger(matches: &clap::ArgMatches) {
         1 => logger.filter_level(log::LevelFilter::Warn),
         2 => logger.filter_level(log::LevelFilter::Info),
         3 => logger.filter_level(log::LevelFilter::Debug),
-        4 | _ => logger.filter_level(log::LevelFilter::Trace),
+        _ => logger.filter_level(log::LevelFilter::Trace),
     };
     logger.init();
     trace!("logger initialized");
@@ -312,7 +310,7 @@ fn is_possible_symbol_file(entry: &walkdir::DirEntry) -> bool {
         Ok(ref mut file) => match magic::file_type(file).unwrap_or(magic::FileType::Unknown) {
             magic::FileType::Elf(magic::ElfType::Exec)
             | magic::FileType::Elf(magic::ElfType::Dyn)
-            | magic::FileType::PDB => true,
+            | magic::FileType::Pdb => true,
 
             magic::FileType::Elf(magic::ElfType::None)
             | magic::FileType::Elf(magic::ElfType::Core)

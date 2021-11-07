@@ -48,7 +48,7 @@ pub enum FileType {
 
     // magic = "Microsoft C/C++ MSF 7.00\r\n\x1a\x44\x53"
     // https://github.com/Microsoft/microsoft-pdb/blob/082c5290e5aff028ae84e43affa8be717aa7af73/PDB/msf/msf.cpp#L962
-    PDB,
+    Pdb,
 
     // magic = "\x7FELF"
     // https://refspecs.linuxfoundation.org/elf/gabi4+/ch4.eheader.html#elfid
@@ -95,7 +95,7 @@ pub fn file_type(file: &mut File) -> Result<FileType> {
                     // 'i'
                     0x69 => {
                         if &buf[2..29] == b"crosoft C/C++ MSF 7.00\r\n\x1a\x44\x53" {
-                            Ok(FileType::PDB)
+                            Ok(FileType::Pdb)
                         } else {
                             Ok(FileType::Unknown)
                         }
