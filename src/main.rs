@@ -1,12 +1,12 @@
 use log::{debug, error, trace, warn};
-use walkdir::WalkDir;
 use path_slash::PathExt;
+use walkdir::WalkDir;
 
 use std::collections::HashMap;
 use std::fs::File;
 use std::path::{Path, PathBuf};
-use std::vec::Vec;
 use std::process::Command;
+use std::vec::Vec;
 
 use tempfile;
 
@@ -39,11 +39,11 @@ fn main() -> Result<(), std::io::Error> {
                 compiledfiles::Error::MissingDebugSymbols => {
                     debug!("{} is missing debug symbols", entry.display());
                     continue;
-                },
-                | compiledfiles::Error::UnrecognizedFileFormat => {
+                }
+                compiledfiles::Error::UnrecognizedFileFormat => {
                     debug!("{} is an unrecognized format", entry.display());
                     continue;
-                },
+                }
                 _ => {
                     warn!(
                         "Unexpected parsing error of known file \"{}\": {}",
@@ -56,11 +56,18 @@ fn main() -> Result<(), std::io::Error> {
         };
 
         if source_files.is_empty() {
-            warn!("{} was parsed but contained no source files", entry.display());
+            warn!(
+                "{} was parsed but contained no source files",
+                entry.display()
+            );
             continue;
         }
 
-        trace!("{} contains {} source files", entry.display(), source_files.len());
+        trace!(
+            "{} contains {} source files",
+            entry.display(),
+            source_files.len()
+        );
 
         // generate source file to path mapping
         let repos = repos_from_source_files(&source_files);
@@ -69,9 +76,7 @@ fn main() -> Result<(), std::io::Error> {
         let mapping = generate_mapping(&repos);
 
         if !mapping.is_empty() {
-            let json = serde_json::json!({
-                "documents": mapping
-            });
+            let json = serde_json::json!({ "documents": mapping });
             if matches.is_present("dryrun") {
                 println!("Would update {}", entry.display());
                 println!("{}", serde_json::to_string_pretty(&json).unwrap());
@@ -95,9 +100,15 @@ fn main() -> Result<(), std::io::Error> {
 
                 if cmd_output.status.success() {
                     std::fs::rename(output_elf_path, entry.clone()).unwrap();
-                    println!("Updated {}", std::fs::canonicalize(&entry).unwrap().display());
+                    println!(
+                        "Updated {}",
+                        std::fs::canonicalize(&entry).unwrap().display()
+                    );
                 } else {
-                    println!("Failed to update {}", std::fs::canonicalize(&entry).unwrap().display());
+                    println!(
+                        "Failed to update {}",
+                        std::fs::canonicalize(&entry).unwrap().display()
+                    );
                     debug!("{}", std::str::from_utf8(&cmd_output.stderr).unwrap());
                 }
             }
@@ -112,7 +123,11 @@ fn repos_from_source_files(source_files: &[compiledfiles::FileInfo]) -> Vec<git2
         trace!("Searching for repo for {}", file.path.display());
         if file.path.is_file() {
             if let Some(repo) = repo_from_source_file(&file.path) {
-                trace!("Found repo {} for {}", repo.workdir().unwrap().display(), file.path.display());
+                trace!(
+                    "Found repo {} for {}",
+                    repo.workdir().unwrap().display(),
+                    file.path.display()
+                );
                 let rel_path = file.path.strip_prefix(repo.workdir().unwrap()).unwrap();
                 let rel_path = PathBuf::from(rel_path.to_slash().unwrap());
                 if repos
@@ -120,10 +135,21 @@ fn repos_from_source_files(source_files: &[compiledfiles::FileInfo]) -> Vec<git2
                     .any(|x| x.workdir().unwrap() == repo.workdir().unwrap())
                 {
                     // Do nothing, we already know about this repo
-                } else if repo.head().unwrap().peel_to_tree().unwrap().get_path(&rel_path).is_ok() {
+                } else if repo
+                    .head()
+                    .unwrap()
+                    .peel_to_tree()
+                    .unwrap()
+                    .get_path(&rel_path)
+                    .is_ok()
+                {
                     repos.push(repo);
                 } else {
-                    debug!("{} not tracked in git repo {}", file.path.display(), repo.workdir().unwrap().display());
+                    debug!(
+                        "{} not tracked in git repo {}",
+                        file.path.display(),
+                        repo.workdir().unwrap().display()
+                    );
                 }
             }
         } else {
@@ -205,9 +231,12 @@ fn generate_mapping(repos: &[git2::Repository]) -> HashMap<PathBuf, String> {
         match generate_url(&remote_url, &hash) {
             Some(url) => {
                 map.insert(workdir.join("*"), url.into_string());
-            },
+            }
             None => {
-                warn!("Skipping repo {}. Unable to generate url", workdir.display());
+                warn!(
+                    "Skipping repo {}. Unable to generate url",
+                    workdir.display()
+                );
             }
         }
     }
@@ -294,7 +323,7 @@ fn is_possible_symbol_file(entry: &walkdir::DirEntry) -> bool {
             | magic::FileType::Unknown => {
                 trace!("File type not usabled for {}", entry.path().display());
                 false
-            },
+            }
         },
         Err(e) => {
             warn!("Failed to open {} due to {}", path.display(), e);
@@ -318,7 +347,7 @@ fn parse_cli_args<'a>() -> clap::ArgMatches<'a> {
             clap::Arg::with_name("dryrun")
                 .short("n")
                 .long("dryrun")
-                .help("Run without modifying the binaries")
+                .help("Run without modifying the binaries"),
         )
         .arg(
             clap::Arg::with_name("PATH")
