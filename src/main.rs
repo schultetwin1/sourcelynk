@@ -127,7 +127,7 @@ fn repos_from_source_files(source_files: &[compiledfiles::FileInfo]) -> Vec<git2
                     file.path.display()
                 );
                 let rel_path = file.path.strip_prefix(repo.workdir().unwrap()).unwrap();
-                let rel_path = PathBuf::from(rel_path.to_slash().unwrap());
+                let rel_path = PathBuf::from(rel_path.to_slash().unwrap().to_string());
                 if repos
                     .iter()
                     .any(|x| x.workdir().unwrap() == repo.workdir().unwrap())
