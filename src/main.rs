@@ -263,9 +263,7 @@ fn generate_github_url(url: &url::Url, hash: &git2::Oid) -> url::Url {
     let user = components[0];
     let repo = components[1];
 
-    let url_str = format!(
-        "https://api.github.com/repos/{user}/{repo}/contents/*?ref={hash}"
-    );
+    let url_str = format!("https://api.github.com/repos/{user}/{repo}/contents/*?ref={hash}");
 
     url::Url::parse(&url_str).unwrap()
 }
