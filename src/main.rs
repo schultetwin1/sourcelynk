@@ -264,8 +264,7 @@ fn generate_github_url(url: &url::Url, hash: &git2::Oid) -> url::Url {
     let repo = components[1];
 
     let url_str = format!(
-        "https://api.github.com/repos/{}/{}/contents/*?ref={}",
-        user, repo, hash
+        "https://api.github.com/repos/{user}/{repo}/contents/*?ref={hash}"
     );
 
     url::Url::parse(&url_str).unwrap()
@@ -279,11 +278,7 @@ fn generate_azure_devops_url(url: &url::Url, hash: &git2::Oid) -> url::Url {
     let project = components[1];
     let repo = components[3];
     let url_str = format!(
-        "https://dev.azure.com/{}/{}/_apis/git/repositories/{}/items?versionDescriptor.versionType=commit&versionDescriptor.version={}&api-version=5.1&path=/*",
-        organization,
-        project,
-        repo,
-        hash
+        "https://dev.azure.com/{organization}/{project}/_apis/git/repositories/{repo}/items?versionDescriptor.versionType=commit&versionDescriptor.version={hash}&api-version=5.1&path=/*"
     );
 
     url::Url::parse(&url_str).unwrap()
