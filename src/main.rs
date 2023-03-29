@@ -1,3 +1,4 @@
+use clap::ArgAction;
 use log::{debug, error, trace, warn};
 use path_slash::PathExt;
 use walkdir::WalkDir;
@@ -19,7 +20,7 @@ fn main() -> Result<(), std::io::Error> {
     let matches = parse_cli_args();
     initialize_logger(&matches);
 
-    for entry in WalkDir::new(matches.value_of("PATH").unwrap())
+    for entry in WalkDir::new(matches.get_one::<&str>("PATH").unwrap())
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| e.file_type().is_file())
@@ -75,7 +76,7 @@ fn main() -> Result<(), std::io::Error> {
 
         if !mapping.is_empty() {
             let json = serde_json::json!({ "documents": mapping });
-            if matches.is_present("dryrun") {
+            if matches.contains_id("dryrun") {
                 println!("Would update {}", entry.display());
                 println!("{}", serde_json::to_string_pretty(&json).unwrap());
                 println!();
@@ -286,7 +287,7 @@ fn initialize_logger(matches: &clap::ArgMatches) {
     // Vary the output based on how many times the user used the "verbose" flag
     // (i.e. 'myprog -v -v -v' or 'myprog -vvv' vs 'myprog -v'
     let mut logger = pretty_env_logger::formatted_builder();
-    let logger = match matches.occurrences_of("v") {
+    let logger = match matches.get_count("v") {
         0 => logger.filter_level(log::LevelFilter::Error),
         1 => logger.filter_level(log::LevelFilter::Warn),
         2 => logger.filter_level(log::LevelFilter::Info),
@@ -323,25 +324,25 @@ fn is_possible_symbol_file(entry: &walkdir::DirEntry) -> bool {
     }
 }
 
-fn parse_cli_args<'a>() -> clap::ArgMatches<'a> {
-    clap::App::new(APP_NAME)
+fn parse_cli_args<'a>() -> clap::ArgMatches {
+    clap::Command::new(APP_NAME)
         .version(env!("CARGO_PKG_VERSION"))
         .about("CLI tool for dbgsrv")
         .author(APP_AUTHOR)
         .arg(
-            clap::Arg::with_name("v")
-                .short("v")
-                .multiple(true)
+            clap::Arg::new("v")
+                .short('v')
+                .action(ArgAction::Count)
                 .help("Sets the level of verbosity"),
         )
         .arg(
-            clap::Arg::with_name("dryrun")
-                .short("n")
+            clap::Arg::new("dryrun")
+                .short('n')
                 .long("dryrun")
                 .help("Run without modifying the binaries"),
         )
         .arg(
-            clap::Arg::with_name("PATH")
+            clap::Arg::new("PATH")
                 .help("Path to search for debug info files")
                 .default_value(".")
                 .index(1),
