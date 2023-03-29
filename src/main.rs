@@ -324,7 +324,7 @@ fn is_possible_symbol_file(entry: &walkdir::DirEntry) -> bool {
     }
 }
 
-fn parse_cli_args<'a>() -> clap::ArgMatches {
+fn parse_cli_args() -> clap::ArgMatches {
     clap::Command::new(APP_NAME)
         .version(env!("CARGO_PKG_VERSION"))
         .about("CLI tool for dbgsrv")
