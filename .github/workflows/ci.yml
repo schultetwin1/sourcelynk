@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
   schedule:
     - cron: '0 0 * * *'
 
@@ -27,19 +27,18 @@ jobs:
 
     steps:
       - name: 'Checkout Code'
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 'Setup Rust Toolchain'
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: ${{ matrix.rust }}
-          components: rustfmt, clippy
+        run: |
+          rustup toolchain install ${{ matrix.rust }} --component rustfmt,clippy
+          rustup default ${{ matrix.rust }}
 
       - name: 'Build'
         run: cargo build --release --all-features
 
       - name: 'Test'
-        run: cargo test -- --test-threads=1 # Needed for now due to use of env vars
+        run: cargo test
 
       - name: 'Format Check'
         run: cargo fmt --all -- --check
