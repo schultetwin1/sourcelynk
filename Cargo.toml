@@ -8,7 +8,7 @@ edition = "2018"
 
 [dependencies]
 compiledfiles="0.8"
-clap = "4.4"
+clap = "4.5"
 git2 = { version = "0.18", default-features = false }
 log = "0.4"
 path-slash = "0.2.1"
