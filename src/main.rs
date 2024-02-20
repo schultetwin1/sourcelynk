@@ -7,7 +7,6 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use std::vec::Vec;
 
 mod magic;
 
