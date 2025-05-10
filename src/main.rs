@@ -248,11 +248,11 @@ fn generate_url(url: &url::Url, hash: &git2::Oid) -> Option<url::Url> {
         } else if domain.ends_with("visualstudio.com") {
             Some(generate_azure_devops_url(url, hash))
         } else {
-            warn!("{} is not a known domain ({})", domain, url);
+            warn!("{domain} is not a known domain ({url})");
             None
         }
     } else {
-        warn!("Url {} has no domain", url);
+        warn!("Url {url} has no domain");
         None
     }
 }
